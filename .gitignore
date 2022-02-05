@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+metadata.xlsx
+config.yml
+_auth0.yml
+db
