@@ -2,7 +2,6 @@ auth0_server(function(input, output, session) {
 
   user_metadata <- reactive({
     # users_metadata[1, ] %>% as.list()
-    print(session$userData$auth0_info)
     user_data <- users_metadata %>%
       filter(mail == session$userData$auth0_info$name) %>%
       as.list()
@@ -14,7 +13,8 @@ auth0_server(function(input, output, session) {
     req(user_metadata())
     waiter_show(html = waiting_screen("Consultant el consum elèctric..."), color = "#00000080")
     if (file.exists(user_metadata()$filename)) {
-      last_power_data <- readxl::read_excel(user_metadata()$filename)
+      last_power_data <- readxl::read_excel(user_metadata()$filename) %>%
+        mutate(datetime = with_tz(datetime, tz = config$tzone))
       last_date <- max(last_power_data$datetime)
     } else {
       last_power_data <- tibble()
@@ -41,6 +41,7 @@ auth0_server(function(input, output, session) {
   })
 
   energy_data <- reactive({
+    print(power_data()[nrow(power_data()), ])
     get_kWh_from_W(power_data())
   })
 
@@ -48,8 +49,8 @@ auth0_server(function(input, output, session) {
     req(user_metadata())
     infoBox(
       title = 'Consum actual',
-      value = paste(round(power_data()$power[nrow(power_data())], 2), "W"),
-      subtitle = power_data()$datetime[nrow(power_data())],
+      value = paste(round(power_data()$power[nrow(power_data())]), "W"),
+      subtitle = paste("A les", strftime(power_data()$datetime[nrow(power_data())], format = "%H:%M")),
       icon = icon("bolt"),
       color = 'blue',
       width = 6,
@@ -74,12 +75,12 @@ auth0_server(function(input, output, session) {
 
   output$week_total <- renderInfoBox({
     week_total <- energy_data() %>%
-      filter(yearweek(datetime) == yearweek(today()))
+      filter(tsibble::yearweek(datetime) == tsibble::yearweek(today()))
 
     infoBox(
       title = "Consum setmanal",
       value = paste(sum(week_total$energy), "kWh"),
-      subtitle = paste("Setmana del", get_week_from_datetime(week_total$datetime)[1]),
+      subtitle = paste("Setmana del", strftime(power_data()$datetime[nrow(power_data())], format = "%d/%m/%Y")),
       icon = icon("plug"),
       color = 'blue',
       width = 6,
@@ -94,7 +95,18 @@ auth0_server(function(input, output, session) {
       # dyRangeSelector()
       df_to_ts() %>%
       hchart(type = "area", name = "Potència (W)") %>%
-      hc_navigator(enabled = T)
+      hc_navigator(enabled = T) %>%
+      hc_rangeSelector(
+        buttons = list(
+          list(type = 'all', text = 'Tot', title = 'Tot'),
+          list(type = 'month', count = 1, text = '1m', title = '1 mes'),
+          list(type = 'day', count = 1, text = '1d', title = '1 dia'),
+          list(type = 'hour', count = 6, text = '6h', title = '6 hores'),
+          list(type = 'hour', count = 1, text = '1h', title = '1 hora')
+        ),
+        selected = 2
+      ) %>%
+      hc_exporting(enabled = T)
   })
 
   output$plot_columns <- renderHighchart({
@@ -105,13 +117,14 @@ auth0_server(function(input, output, session) {
       # dySeries('energy', 'Consum', 'navy') %>%
       # dyBarChart()
       df_to_ts() %>%
-      hchart(type = "column", name = "Energia (kWh)")
+      hchart(type = "column", name = "Energia (kWh)") %>%
+      hc_rangeSelector(enabled = F)
   })
 
   month_data <- reactive({
     month_data <- energy_data() %>%
       get_tariff() %>%
-      group_by(yearmonth = yearmonth(datetime), tariff) %>%
+      group_by(yearmonth = tsibble::yearmonth(datetime), tariff) %>%
       summarise(energy = sum(energy))
     month_data <- month_data %>%
       filter(yearmonth == max(month_data$yearmonth)) %>%

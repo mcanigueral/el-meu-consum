@@ -1,6 +1,6 @@
 
 library(shiny)
-library(shinyWidgets)
+# library(shinyWidgets)
 library(shinythemes)
 library(shinydashboard)
 library(dutils)
@@ -12,7 +12,6 @@ library(lubridate)
 library(purrr)
 library(tidyr)
 library(waiter)
-library(tsibble)
 options(scipen=999) # To avoid scientific notation
 source('support/server_utils.R')
 source('support/ui_utils.R')
@@ -44,9 +43,16 @@ sensors_dynamodb <- get_dynamodb_py(
 power_table <- get_dynamo_table_py(sensors_dynamodb, config$dynamodb$power_table_name)
 
 
-# Test to get data from specific user -------------------------------------
+# Highcharter global options ----------------------------------------------
+
+hc_global <- getOption("highcharter.global")
+hc_global$useUTC <- FALSE
+hc_global$timezoneOffset <- 60
+options(highcharter.global = hc_global)
+
+# # Test to get data from specific user -------------------------------------
 # rs <- query_timeseries_data_table_py(
-#   power_table, 'id', 'B882', 'timestamp',
+#   power_table, 'id', '9CCE', 'timestamp',
 #   today()-days(30), today()+days(1)
 # ) %>%
 #   mutate(
@@ -56,4 +62,19 @@ power_table <- get_dynamo_table_py(sensors_dynamodb, config$dynamodb$power_table
 #   mutate(power = current*230) %>%
 #   # power_from_current(n_phases = 1) %>%
 #   select(datetime, power)
-
+#
+# rs %>%
+#   df_to_ts() %>%
+#   hchart(type = "area", name = "Potència (W)") %>%
+#   hc_navigator(enabled = T) %>%
+#   hc_rangeSelector(
+#     buttons = list(
+#       list(type = 'all', text = 'Tot', title = 'Tot'),
+#       list(type = 'month', count = 1, text = '1m', title = '1 mes'),
+#       list(type = 'day', count = 1, text = '1d', title = '1 dia'),
+#       list(type = 'hour', count = 6, text = '6h', title = '6 hores'),
+#       list(type = 'hour', count = 1, text = '1h', title = '1 hora')
+#     ),
+#     selected = 2
+#   ) %>%
+#   hc_exporting(enabled = T)

@@ -1,6 +1,6 @@
 auth0_ui(fluidPage(
 
-  useShinydashboard(),
+  shinyWidgets::useShinydashboard(),
   theme = shinytheme("darkly"),
   use_waiter(),
   # # This removes the "code=XXX" of the URL after login, so avoids the error after refreshing
