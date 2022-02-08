@@ -22,6 +22,7 @@ a0_info <- auth0::auth0_info()
 
 # Python configuration
 config <- config::get(file = 'config.yml')
+Sys.setenv(TZ=config$tzone)
 
 # Python environment ------------------------------------------------------
 reticulate::use_python(config$python_path, required = T) # Restart R session to change the python env

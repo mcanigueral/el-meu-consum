@@ -1,5 +1,4 @@
 auth0_ui(fluidPage(
-
   shinyWidgets::useShinydashboard(),
   theme = shinytheme("darkly"),
   use_waiter(),
@@ -7,7 +6,18 @@ auth0_ui(fluidPage(
   tags$script(JS("setTimeout(function(){history.pushState({}, 'Page Title', '/');}, 2000);")),
 
   # Application title
-  titlePanel("El meu consum elèctric"),
+  titlePanel(tagList(
+    img(src = "udg_logo_short.png", height = 40),
+    HTML("&nbsp;"),
+    span(strong("El meu consum")),
+    span(
+      logoutButton(
+        "", icon = icon('sign-out-alt')
+        # style = "border-radius: 10px; background-color: #008D4C; border-color: #008D4C; color: white;"
+      ),
+      style = "position:absolute;right:1em;"
+    )
+  ), windowTitle = "El meu consum"),
   hr(),
 
   # Menu
