@@ -41,7 +41,6 @@ auth0_server(function(input, output, session) {
   })
 
   energy_data <- reactive({
-    print(power_data()[nrow(power_data()), ])
     get_kWh_from_W(power_data())
   })
 
@@ -133,38 +132,59 @@ auth0_server(function(input, output, session) {
   })
 
   output$month_demand <- renderUI({
-    consum_total_mes <- sum(month_data()$vall, month_data()$pla, month_data()$punta)
+    consum_vall <- sum(month_data()$vall, na.rm = T)
+    consum_pla <- sum(month_data()$pla, na.rm = T)
+    consum_punta <- sum(month_data()$punta, na.rm = T)
+    consum_total <- sum(consum_vall, consum_pla, consum_punta)
+
+    cost_vall <- round(consum_vall*0.318605, 2)
+    cost_pla <- round(consum_pla*0.389136, 2)
+    cost_punta <- round(consum_punta*0.494932, 2)
+    cost_total <- sum(cost_vall, cost_pla, cost_punta)
+
     wellPanel(
       h4("Aquest mes has consumit:"),
       fluidRow(
         infoBox(
           title = "Consum hores vall",
-          value = paste(round(sum(month_data()$vall, na.rm = T), 2), "kWh"),
-          subtitle = paste0(round(month_data()$vall/consum_total_mes*100), "% del total del mes"),
+          value = paste0(round(consum_vall, 2), "kWh (", cost_vall, "€)"),
+          subtitle = paste0(round(consum_vall/consum_total*100), "% del total del mes"),
           icon = icon("long-arrow-alt-down"),
           color = 'blue',
-          width = 4,
+          width = 3,
           fill = T
         ),
         infoBox(
           title = "Consum hores pla",
-          value = paste(round(sum(month_data()$pla, na.rm = T), 2), "kWh"),
-          subtitle = paste0(round(month_data()$pla/consum_total_mes*100), "% del total del mes"),
+          value = paste0(round(consum_pla, 2), "kWh (", cost_pla, "€)"),
+          subtitle = paste0(round(consum_pla/consum_total*100), "% del total del mes"),
           icon = icon("arrows-alt-h"),
           color = 'blue',
-          width = 4,
+          width = 3,
           fill = T
         ),
         infoBox(
           title = "Consum hores punta",
-          value = paste(round(sum(month_data()$punta, na.rm = T), 2), "kWh"),
-          subtitle = paste0(round(month_data()$punta/consum_total_mes*100), "% del total del mes"),
+          value = paste0(round(consum_punta, 2), "kWh (", cost_punta, "€)"),
+          subtitle = paste0(round(consum_punta/consum_total*100), "% del total del mes"),
           icon = icon("long-arrow-alt-up"),
           color = 'blue',
-          width = 4,
+          width = 3,
+          fill = T
+        ),
+        infoBox(
+          title = "Consum total",
+          value = paste0(round(consum_total, 2), "kWh (", round(cost_total, 2), "€)"),
+          # subtitle = paste0(round(month_data()$punta/consum_total*100), "% del total del mes"),
+          icon = icon("calendar"),
+          color = 'blue',
+          width = 3,
           fill = T
         )
-      )
+      ),
+      HTML('La tarifa elèctrica utilitzada és l\'actual de SomEnergia de tres períodes
+      (<a href = "https://www.somenergia.coop/ca/tarifes-d-electricitat/#preus-20td-amb-impostos">Tarifa 2.0TD SOM</a>),
+           considerant impostos i l\'IVA del 21%.')
     )
   })
 

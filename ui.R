@@ -7,8 +7,8 @@ auth0_ui(fluidPage(
 
   # Application title
   titlePanel(tagList(
-    img(src = "udg_logo_short.png", height = 40),
-    HTML("&nbsp;"),
+    # img(src = "udg_logo_short.png", height = 40),
+    # HTML("&nbsp;"),
     span(strong("El meu consum")),
     span(
       logoutButton(
