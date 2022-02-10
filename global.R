@@ -1,6 +1,5 @@
 
 library(shiny)
-# library(shinyWidgets)
 library(shinythemes)
 library(shinydashboard)
 library(dutils)
@@ -51,31 +50,3 @@ hc_global$useUTC <- FALSE
 hc_global$timezoneOffset <- 60
 options(highcharter.global = hc_global)
 
-# # Test to get data from specific user -------------------------------------
-# rs <- query_timeseries_data_table_py(
-#   power_table, 'id', '9CCE', 'timestamp',
-#   today()-days(30), today()+days(1)
-# ) %>%
-#   mutate(
-#     datetime = floor_date(as_datetime(timestamp/1000, tz = config$tzone), '5 minutes'),
-#     map_dfr(data, ~ .x)
-#   ) %>%
-#   mutate(power = current*230) %>%
-#   # power_from_current(n_phases = 1) %>%
-#   select(datetime, power)
-#
-# rs %>%
-#   df_to_ts() %>%
-#   hchart(type = "area", name = "Potència (W)") %>%
-#   hc_navigator(enabled = T) %>%
-#   hc_rangeSelector(
-#     buttons = list(
-#       list(type = 'all', text = 'Tot', title = 'Tot'),
-#       list(type = 'month', count = 1, text = '1m', title = '1 mes'),
-#       list(type = 'day', count = 1, text = '1d', title = '1 dia'),
-#       list(type = 'hour', count = 6, text = '6h', title = '6 hores'),
-#       list(type = 'hour', count = 1, text = '1h', title = '1 hora')
-#     ),
-#     selected = 2
-#   ) %>%
-#   hc_exporting(enabled = T)

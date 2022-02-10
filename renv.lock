@@ -282,13 +282,12 @@
     },
     "dplyr": {
       "Package": "dplyr",
-      "Version": "1.0.7",
+      "Version": "1.0.8",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "36f1ae62f026c8ba9f9b5c9a08c03297",
+      "Hash": "ef47665e64228a17609d6df877bf86f2",
       "Requirements": [
         "R6",
-        "ellipsis",
         "generics",
         "glue",
         "lifecycle",
@@ -926,10 +925,10 @@
     },
     "shinyWidgets": {
       "Package": "shinyWidgets",
-      "Version": "0.6.3",
+      "Version": "0.6.4",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "89b90f439e5a824f8bcbadd082106902",
+      "Hash": "02fba70d7c5c1ab0754d9c0108c029eb",
       "Requirements": [
         "bslib",
         "htmltools",

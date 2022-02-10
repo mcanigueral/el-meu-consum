@@ -1,7 +1,6 @@
 auth0_server(function(input, output, session) {
 
   user_metadata <- reactive({
-    # users_metadata[1, ] %>% as.list()
     user_data <- users_metadata %>%
       filter(mail == session$userData$auth0_info$name) %>%
       as.list()
@@ -15,7 +14,7 @@ auth0_server(function(input, output, session) {
     if (file.exists(user_metadata()$filename)) {
       last_power_data <- readxl::read_excel(user_metadata()$filename) %>%
         mutate(datetime = with_tz(datetime, tz = config$tzone))
-      last_date <- max(last_power_data$datetime)
+      last_date <- as_date(max(last_power_data$datetime))
     } else {
       last_power_data <- tibble()
       last_date <- dmy(01012022)
@@ -31,7 +30,8 @@ auth0_server(function(input, output, session) {
           power = power_from_current(current, user_metadata()$phases)
         ) %>%
         select(datetime, power)
-      power_tbl <- bind_rows(last_power_data, new_power_data)
+      power_tbl <- bind_rows(last_power_data, new_power_data) %>%
+        distinct()
       writexl::write_xlsx(power_tbl, user_metadata()$filename)
     } else {
       power_tbl <- tibble(datetime = today(), power = NA)
@@ -64,7 +64,7 @@ auth0_server(function(input, output, session) {
     infoBox(
       title = "Consum d'avui",
       value = paste(round(sum(energy_today$energy), 2), "kWh"),
-      subtitle = energy_today$date,
+      subtitle = strftime(energy_today$datetime[1], format = "%d/%m/%Y"),
       icon = icon("lightbulb"),
       color = 'blue',
       width = 6,
@@ -89,15 +89,12 @@ auth0_server(function(input, output, session) {
 
   output$plot_timeseries <- renderHighchart({
     power_data() %>%
-      # dyplot(ylab = 'Potència (W)', group = "a") %>%
-      # dySeries('power', 'Consum', 'navy', fillGraph = T) %>%
-      # dyRangeSelector()
       df_to_ts() %>%
       hchart(type = "area", name = "Potència (W)") %>%
       hc_navigator(enabled = T) %>%
       hc_rangeSelector(
         buttons = list(
-          list(type = 'all', text = 'Tot', title = 'Tot'),
+          list(type = 'all', text = 'Total', title = 'Totes les dades'),
           list(type = 'month', count = 1, text = '1m', title = '1 mes'),
           list(type = 'day', count = 1, text = '1d', title = '1 dia'),
           list(type = 'hour', count = 6, text = '6h', title = '6 hores'),
@@ -110,14 +107,13 @@ auth0_server(function(input, output, session) {
 
   output$plot_columns <- renderHighchart({
     energy_data() %>%
-      group_by(date = date(datetime)) %>%
+      mutate(date = floor_date(datetime, unit = input$columns_unit, week_start = 1)) %>%
+      group_by(date) %>%
       summarise(energy = sum(energy)) %>%
-      # dyplot(ylab = "Energia (kWh)", group = "b") %>%
-      # dySeries('energy', 'Consum', 'navy') %>%
-      # dyBarChart()
       df_to_ts() %>%
       hchart(type = "column", name = "Energia (kWh)") %>%
-      hc_rangeSelector(enabled = F)
+      hc_rangeSelector(enabled = F) %>%
+      hc_exporting(enabled = T)
   })
 
   month_data <- reactive({

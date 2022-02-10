@@ -12,8 +12,8 @@ auth0_ui(fluidPage(
     span(strong("El meu consum")),
     span(
       logoutButton(
-        "", icon = icon('sign-out-alt')
-        # style = "border-radius: 10px; background-color: #008D4C; border-color: #008D4C; color: white;"
+        "", icon = icon('sign-out-alt'),
+        style = "border-radius: 20px;"
       ),
       style = "position:absolute;right:1em;"
     )
@@ -32,6 +32,13 @@ auth0_ui(fluidPage(
   hr(),
   fluidRow(
     highchartOutput('plot_timeseries'),
+    column(
+      12,
+      radioButtons(
+        'columns_unit', label = NULL, inline = T,
+        choices = c("Diari" = "day", "Setmanal" = "week", "Mensual" = "month", "Anual" = "year")
+      )
+    ),
     highchartOutput('plot_columns')
   ),
   hr(),
