@@ -2,7 +2,7 @@
 source('global.R')
 
 start_date <- today()
-end_date <- start_date + days(1)
+end_date <- today() + days(1)
 
 # Query for one user ------------------------------------------------------
 
@@ -39,3 +39,5 @@ users_demand %>%
   mutate(datetime = datetime_to_timestamp(datetime)) %>%
   hchart(hcaes(x = datetime, y = power, group = id),  type = 'line') %>%
   hc_xAxis(type = 'datetime')
+
+

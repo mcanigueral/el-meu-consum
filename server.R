@@ -73,13 +73,14 @@ auth0_server(function(input, output, session) {
   })
 
   output$week_total <- renderInfoBox({
-    week_total <- energy_data() %>%
-      filter(tsibble::yearweek(datetime) == tsibble::yearweek(today()))
+    week_data <- energy_data() %>%
+      mutate(yweek = tsibble::yearweek(datetime)) %>%
+      filter(yweek == tsibble::yearweek(energy_data()$datetime[nrow(energy_data())]))
 
     infoBox(
       title = "Consum setmanal",
-      value = paste(sum(week_total$energy), "kWh"),
-      subtitle = paste("Setmana del", strftime(power_data()$datetime[nrow(power_data())], format = "%d/%m/%Y")),
+      value = paste(sum(week_data$energy), "kWh"),
+      subtitle = paste("Setmana del", strftime(week_data$yweek[nrow(week_data)], format = "%d/%m/%Y")),
       icon = icon("plug"),
       color = 'blue',
       width = 6,
@@ -96,11 +97,12 @@ auth0_server(function(input, output, session) {
         buttons = list(
           list(type = 'all', text = 'Total', title = 'Totes les dades'),
           list(type = 'month', count = 1, text = '1m', title = '1 mes'),
+          list(type = 'week', count = 1, text = '1w', title = '1 setmana'),
           list(type = 'day', count = 1, text = '1d', title = '1 dia'),
           list(type = 'hour', count = 6, text = '6h', title = '6 hores'),
           list(type = 'hour', count = 1, text = '1h', title = '1 hora')
         ),
-        selected = 2
+        selected = 3
       ) %>%
       hc_exporting(enabled = T)
   })
