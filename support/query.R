@@ -1,13 +1,13 @@
 
 source('global.R')
 
-start_date <- today()
-end_date <- today() + days(1)
+start_date <- dmy(01022022) # today() - days(1)
+end_date <- today() - days(-1)
 
 # Query for one user ------------------------------------------------------
 
 user_demand <- query_timeseries_data_table_py(
-  power_table, 'id', '9CCE', 'timestamp',
+  power_table, 'id', 'F814', 'timestamp',
   start_date, end_date
 ) %>%
   mutate(
@@ -40,4 +40,4 @@ users_demand %>%
   hchart(hcaes(x = datetime, y = power, group = id),  type = 'line') %>%
   hc_xAxis(type = 'datetime')
 
-
+users_demand %>% writexl::write_xlsx('consum_de_tots.xlsx')

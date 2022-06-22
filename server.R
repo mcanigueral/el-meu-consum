@@ -44,6 +44,9 @@ auth0_server(function(input, output, session) {
     get_kWh_from_W(power_data())
   })
 
+
+# KPIs --------------------------------------------------------------------
+
   output$power_now <- renderInfoBox({
     req(user_metadata())
     infoBox(
@@ -88,6 +91,8 @@ auth0_server(function(input, output, session) {
     )
   })
 
+# Plot timeseries ---------------------------------------------------------
+
   output$plot_timeseries <- renderHighchart({
     power_data() %>%
       df_to_ts() %>%
@@ -106,6 +111,8 @@ auth0_server(function(input, output, session) {
       ) %>%
       hc_exporting(enabled = T)
   })
+
+# Plot aggregat -----------------------------------------------------------
 
   output$plot_columns <- renderHighchart({
     energy_data() %>%
@@ -128,6 +135,9 @@ auth0_server(function(input, output, session) {
       pivot_wider(names_from = 'tariff', values_from = 'energy')
     month_data
   })
+
+
+# Consum del mes ------------------------------------------------------------
 
   output$month_demand <- renderUI({
     consum_vall <- sum(month_data()$vall, na.rm = T)
@@ -186,6 +196,8 @@ auth0_server(function(input, output, session) {
     )
   })
 
+
+# Download ----------------------------------------------------------------
 
   output$download <- downloadHandler(
     filename = function() {
